@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מעבד הלוגו האולטימטיבי לMake</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <div class="bh">ב"ה</div>
+        <img src="https://i.ibb.co/F4kmFd7/image.png" alt="לוגו החברה" class="logo">
+        <h1>מעבד הלוגו האולטימטיבי</h1>
+        <p class="description">גלה את הקסם של עיצוב לוגו מושלם. עם הכלי החכם שלנו, תוכל להתאים את הלוגו שלך לדרישות Make (לשעבר Integromat) בקלות ובאלגנטיות. פשוט העלה, בחר, והתפעל מהתוצאה.</p>
+        <div class="input-group">
+            <label for="imageInput">בחר את הלוגו שלך (PNG, JPG, GIF, או SVG)</label>
+            <input type="file" id="imageInput" accept="image/*">
+        </div>
+        <div class="input-group">
+            <label for="colorInput">בחר צבע רקע לתצוגה מקדימה</label>
+            <input type="color" id="colorInput" value="#00a350">
+        </div>
+        <button id="processButton">עבד את הלוגו</button>
+        <div class="preview-container">
+            <div class="preview-box">
+                <h3>לוגו מעובד</h3>
+                <canvas id="preview"></canvas>
+            </div>
+            <div class="preview-box">
+                <h3>תצוגה על רקע</h3>
+                <canvas id="previewWithBackground"></canvas>
+            </div>
+        </div>
+        <a id="downloadLink" download="processed_logo.png">הורד את הלוגו המעובד</a>
+        <div id="errorMessage"></div>
+    </div>
+
+<script src="script.js"></script>
+</body>
+</html>
