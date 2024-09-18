@@ -57,35 +57,39 @@
             reader.readAsDataURL(file);
         }
 
-        function processImage(canvas) {
-            let ctx = canvas.getContext('2d');
-            let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            let data = imageData.data;
+function processImage(canvas) {
+    let ctx = canvas.getContext('2d');
+    let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    let data = imageData.data;
 
-            // מגדיר את הצבע הירוק של הלוגו (ייתכן שתצטרך להתאים ערכים אלה)
-            const logoGreen = {r: 0, g: 163, b: 80};
-            const threshold = 30; // סף התאמת צבע
+    let backgroundColor = { r: 255, g: 255, b: 255 }; // צבע הרקע הלבן
 
-            for (let i = 0; i < data.length; i += 4) {
-                let r = data[i];
-                let g = data[i + 1];
-                let b = data[i + 2];
+    for (let i = 0; i < data.length; i += 4) {
+        let r = data[i];
+        let g = data[i + 1];
+        let b = data[i + 2];
+        let a = data[i + 3];
 
-                // בודק אם צבע הפיקסל קרוב לירוק של הלוגו
-                if (Math.abs(r - logoGreen.r) < threshold &&
-                    Math.abs(g - logoGreen.g) < threshold &&
-                    Math.abs(b - logoGreen.b) < threshold) {
-                    // מגדיר ללבן
-                    data[i] = data[i + 1] = data[i + 2] = 255;
-                } else {
-                    // מגדיר לשקוף
-                    data[i] = data[i + 1] = data[i + 2] = 0;
-                    data[i + 3] = 0;
-                }
-            }
+        // חישוב הבהירות של הפיקסל
+        let brightness = (r * 0.299 + g * 0.587 + b * 0.114) / 255;
 
-            ctx.putImageData(imageData, 0, 0);
+        // שימור השקיפות המקורית
+        let newAlpha = a;
+
+        // התאמת הצבע ללבן תוך שמירה על השקיפות
+        data[i] = backgroundColor.r;
+        data[i + 1] = backgroundColor.g;
+        data[i + 2] = backgroundColor.b;
+        data[i + 3] = newAlpha;
+
+        // התאמת האלפא בהתאם לבהירות המקורית
+        if (brightness < 0.5) {
+            data[i + 3] = Math.round(newAlpha * (1 - brightness * 2));
         }
+    }
+
+    ctx.putImageData(imageData, 0, 0);
+}
 
         function displayProcessedImage(imageData) {
             // מציג תמונה מעובדת
