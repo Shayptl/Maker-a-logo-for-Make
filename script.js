@@ -8,54 +8,54 @@
 
         processButton.addEventListener('click', processLogo);
 
-        function processLogo() {
-            const file = imageInput.files[0];
-            if (!file) {
-                showError('אנא בחר קובץ תמונה לפני העיבוד');
+function processLogo() {
+    const file = imageInput.files[0];
+    if (!file) {
+        showError('אנא בחר קובץ תמונה לפני העיבוד');
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const img = new Image();
+        img.onload = function() {
+            let canvas = document.createElement('canvas');
+            canvas.width = 512;
+            canvas.height = 512;
+            let ctx = canvas.getContext('2d');
+            
+            // מרכז את התמונה
+            let scale = Math.min(512 / img.width, 512 / img.height);
+            let width = Math.round(img.width * scale);
+            let height = Math.round(img.height * scale);
+            let x = (512 - width) / 2;
+            let y = (512 - height) / 2;
+            
+            ctx.drawImage(img, x, y, width, height);
+
+            // מעבד את התמונה
+            processImage(canvas);
+
+            // בודק את גודל הקובץ ומפחית איכות אם נדרש
+            let quality = 1.0;
+            let imageData;
+            do {
+                imageData = canvas.toDataURL('image/png', quality);
+                quality -= 0.1;
+            } while (!checkFileSize(imageData) && quality > 0.1);
+
+            if (!checkFileSize(imageData)) {
+                showError('לא ניתן להקטין את התמונה מספיק. אנא נסה תמונה קטנה יותר.');
                 return;
             }
 
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const img = new Image();
-                img.onload = function() {
-                    let canvas = document.createElement('canvas');
-                    canvas.width = 512;
-                    canvas.height = 512;
-                    let ctx = canvas.getContext('2d');
-                    
-                    // מרכז את התמונה
-                    let scale = Math.min(512 / img.width, 512 / img.height);
-                    let width = Math.round(img.width * scale);
-                    let height = Math.round(img.height * scale);
-                    let x = (512 - width) / 2;
-                    let y = (512 - height) / 2;
-                    
-                    ctx.drawImage(img, x, y, width, height);
-
-                    // מעבד את התמונה
-                    processImage(canvas);
-
-                    // בודק את גודל הקובץ ומפחית איכות אם נדרש
-                    let quality = 1.0;
-                    let imageData;
-                    do {
-                        imageData = canvas.toDataURL('image/png', quality);
-                        quality -= 0.1;
-                    } while (imageData.length > 512 * 1024 && quality > 0.1);
-
-                    if (imageData.length > 512 * 1024) {
-                        showError('לא ניתן להקטין את התמונה מספיק. אנא נסה תמונה קטנה יותר.');
-                        return;
-                    }
-
-                    // מציג את התמונה המעובדת
-                    displayProcessedImage(imageData);
-                }
-                img.src = e.target.result;
-            }
-            reader.readAsDataURL(file);
+            // מציג את התמונה המעובדת
+            displayProcessedImage(imageData);
         }
+        img.src = e.target.result;
+    }
+    reader.readAsDataURL(file);
+}
 
 function processImage(canvas) {
     let ctx = canvas.getContext('2d');
@@ -91,28 +91,41 @@ function processImage(canvas) {
     ctx.putImageData(imageData, 0, 0);
 }
 
-        function displayProcessedImage(imageData) {
-            // מציג תמונה מעובדת
-            preview.width = 512;
-            preview.height = 512;
-            let previewCtx = preview.getContext('2d');
-            let processedImg = new Image();
-            processedImg.onload = function() {
-                previewCtx.drawImage(processedImg, 0, 0);
-                
-                // מציג תמונה מעובדת עם רקע
-                previewWithBackground.width = 512;
-                previewWithBackground.height = 512;
-                let previewBgCtx = previewWithBackground.getContext('2d');
-                previewBgCtx.fillStyle = colorInput.value;
-                previewBgCtx.fillRect(0, 0, 512, 512);
-                previewBgCtx.drawImage(processedImg, 0, 0);
+function displayProcessedImage(imageData) {
+    // מציג תמונה מעובדת עם רקע שקוף
+    preview.width = 512;
+    preview.height = 512;
+    let previewCtx = preview.getContext('2d');
+    previewCtx.clearRect(0, 0, 512, 512); // ניקוי הקנבס
+    
+    let processedImg = new Image();
+    processedImg.onload = function() {
+        previewCtx.drawImage(processedImg, 0, 0);
+        
+        // מציג תמונה מעובדת עם רקע צבעוני
+        previewWithBackground.width = 512;
+        previewWithBackground.height = 512;
+        let previewBgCtx = previewWithBackground.getContext('2d');
+        previewBgCtx.fillStyle = colorInput.value;
+        previewBgCtx.fillRect(0, 0, 512, 512);
+        previewBgCtx.drawImage(processedImg, 0, 0);
 
-                downloadLink.href = imageData;
-                downloadLink.style.display = 'inline-block';
-            };
-            processedImg.src = imageData;
-        }
+        downloadLink.href = imageData;
+        downloadLink.style.display = 'inline-block';
+    };
+    processedImg.src = imageData;
+}
+
+function checkFileSize(imageData) {
+    // מחשב את גודל הקובץ ב-KB
+    let sizeInKB = Math.round((imageData.length * 3) / 4) / 1024;
+    
+    if (sizeInKB > 512) {
+        showError(`גודל הקובץ (${sizeInKB.toFixed(2)}KB) גדול מדי. הגודל המקסימלי המותר הוא 512KB.`);
+        return false;
+    }
+    return true;
+}
 
         function showError(message) {
             errorMessage.textContent = message;
